@@ -11,7 +11,7 @@ class AX
    end
 end
 
-def check_autoload(safe = 12)
+def check_autoload(safe)
    File.open("a.rb", "w") {|f| f.puts "class A; end" }
    autoload :A, "a.rb"
    Thread.new do
@@ -149,31 +149,28 @@ if macro_defined?("PG_TRY", %Q{#include "c.h"\n#include "utils/elog.h"})
     $CFLAGS += " -DPG_PL_TRYCATCH"
 end
 
-enable_conversion = false
-if enable_conversion = enable_config("conversion", true)
+subdirs = []
+
+if enable_config("conversion", true)
    $CFLAGS += " -DPLRUBY_ENABLE_CONVERSION"
-   if check_autoload(safe.to_i)
+   if check_autoload(safe)
       $CFLAGS += " -DRUBY_CAN_USE_AUTOLOAD"
    end
    if check_md
       $CFLAGS += " -DRUBY_CAN_USE_MARSHAL_DUMP"
    end
-end
 
-conversions = {}
-subdirs = []
+   conversions = []
 
-if enable_conversion
    Dir.foreach("src/conversions") do |dir| 
       next if dir[0] == ?. || !File.directory?("src/conversions/" + dir)
-      conversions[dir] = true
+      conversions << dir
+      subdirs << "src/conversions/#{dir}"
    end
-   if !conversions.empty?
-      File.open("src/conversions.h", "w") do |conv|
-	 conversions.sort.each do |key, val|
-            conv.puts "#include \"conversions/#{key}/conversions.h\""
-            subdirs << "src/conversions/#{key}"
-         end
+
+   File.open("src/conversions.h", "w") do |conv|
+      conversions.sort.each do |dir|
+         conv.puts "#include \"conversions/#{dir}/conversions.h\""
       end
    end
 end
