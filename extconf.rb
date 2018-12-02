@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
-ARGV.collect! {|x| 
-   x = x.sub(/\A--((?:en|dis)able)-shared\z/) { "--#$1-plruby-shared" }
-}
+ARGV.collect! do |x|
+   x.sub(/\A--((?:en|dis)able)-shared\z/) { "--#$1-plruby-shared" }
+end
 
 orig_argv = ARGV.dup
 
