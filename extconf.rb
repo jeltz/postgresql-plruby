@@ -208,8 +208,8 @@ Dir.chdir("src") do
    create_makefile("plruby#{suffix}")
 end
 
-make = open("Makefile", "w")
-make.print <<-EOF
+File.open("Makefile", "w") do |make|
+   make.print <<-EOF
 SUBDIRS = #{subdirs.join(' ')}
 
 #{rule('all')}
@@ -241,15 +241,13 @@ ri-site:
 
 test: src/$(DLLIB)
 EOF
-regexp = %r{\Atest/conv_(.*)}
-Dir["test/*"].each do |dir|
-   if regexp =~ dir
-      next unless subdirs.include?("src/conversions/#{$1}")
+   Dir["test/*"].each do |dir|
+      if %r{\Atest/conv_(.*)} =~ dir
+         next unless subdirs.include?("src/conversions/#{$1}")
+      end
+      make.puts "\t-(cd #{dir} ; RUBY='#{RbConfig.ruby}' sh ./runtest #{suffix})"
    end
-   make.puts "\t-(cd #{dir} ; RUBY='#{RbConfig.ruby}' sh ./runtest #{suffix})"
 end
-
-make.close
 
 create_lang(suffix, safe)
 
