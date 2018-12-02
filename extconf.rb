@@ -33,26 +33,19 @@ rescue
    true
 end
 
-def create_lang(suffix = '', safe = 0)
-   language, opaque = 'c', 'language_handler'
-   safe = safe.to_i
-   trusted = if safe >= 4
-		"trusted"
-	     else
-		""
-	     end
+def create_lang(suffix)
    puts <<-EOT
 
  ========================================================================
  After the installation use *something like this* to create the language 
  plruby#{suffix}
 
-       	CREATE FUNCTION plruby_call_handler () RETURNS language_handler
-       	AS '$libdir/plruby'
-        LANGUAGE C;
+        CREATE FUNCTION plruby_call_handler() RETURNS language_handler
+        AS '$libdir/plruby'
+        LANGUAGE c;
 
-        CREATE OR REPLACE LANGUAGE plruby
-        HANDLER  plruby_call_handler;
+        CREATE OR REPLACE LANGUAGE plruby#{suffix}
+        HANDLER plruby_call_handler;
 
  ========================================================================
 EOT
@@ -246,6 +239,6 @@ EOF
    end
 end
 
-create_lang(suffix, safe)
+create_lang(suffix)
 
 create_header('src/extconf.h')
