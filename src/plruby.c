@@ -1094,6 +1094,7 @@ for_numvals(obj, argobj)
     Form_pg_type fpg;
     VALUE key, value;
     struct foreach_fmgr *arg;
+    Form_pg_attribute attr;
 
     Data_Get_Struct(argobj, struct foreach_fmgr, arg);
     key = plruby_to_s(rb_ary_entry(obj, 0));
@@ -1107,7 +1108,7 @@ for_numvals(obj, argobj)
     }
     attnum -= 1;
 
-    Form_pg_attribute attr = TupleDescAttr(arg->tupdesc, attnum);
+    attr = TupleDescAttr(arg->tupdesc, attnum);
     if (attr->attisdropped) {
         return Qnil;
     }
