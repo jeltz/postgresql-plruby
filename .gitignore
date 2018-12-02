@@ -1,6 +1,9 @@
+*.o
 *.so
+*.time
 Makefile
 mkmf.log
+/docs/doc/
 /src/extconf.h
 /test/*/test.out
 /test/*/test_mklang.sql
