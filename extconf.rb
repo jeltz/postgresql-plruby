@@ -198,11 +198,11 @@ subdirs.unshift("src")
 Dir.chdir("src") do
    if RbConfig::CONFIG["ENABLE_SHARED"] == "no"
       libs = if RbConfig::CONFIG.key?("LIBRUBYARG_STATIC")
-                RbConfig::expand(RbConfig::CONFIG["LIBRUBYARG_STATIC"].dup).sub(/^-l/, '')
+                RbConfig::expand(RbConfig::CONFIG["LIBRUBYARG_STATIC"]).sub(/^-l/, '')
              else
-                RbConfig::expand(RbConfig::CONFIG["LIBRUBYARG"].dup).sub(/lib([^.]*).*/, '\\1')
+                RbConfig::expand(RbConfig::CONFIG["LIBRUBYARG"]).sub(/lib([^.]*).*/, '\\1')
              end
-      find_library(libs, "ruby_init", RbConfig::expand(RbConfig::CONFIG["archdir"].dup))
+      find_library(libs, "ruby_init", RbConfig::expand(RbConfig::CONFIG["archdir"]))
    end
    $objs = ["plruby.o", "plplan.o", "plpl.o", "pltrans.o"] unless $objs
    create_makefile("plruby#{suffix}")
