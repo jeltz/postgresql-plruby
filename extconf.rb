@@ -3,8 +3,6 @@ ARGV.collect! do |x|
    x.sub(/\A--((?:en|dis)able)-shared\z/) { "--#$1-plruby-shared" }
 end
 
-orig_argv = ARGV.dup
-
 require 'mkmf'
 
 class AX
@@ -184,18 +182,20 @@ suffix = with_config('suffix').to_s
 $CFLAGS += " -DPLRUBY_CALL_HANDLER=plruby#{suffix}_call_handler"
 $CFLAGS += " -DPLRUBY_VALIDATOR=plruby#{suffix}_validator"
 
+subdir_argv = ARGV.dup
+subdir_argv << "--with-cflags=#$CFLAGS -I.. -I../.."
+subdir_argv << "--with-ldflags=#$LDFLAGS"
+subdir_argv << "--with-cppflags=#$CPPFLAGS"
+
 subdirs.each do |key|
-   orig_argv << "--with-cflags='#$CFLAGS -I.. -I ../..'"
-   orig_argv << "--with-ldflags='#$LDFLAGS'"
-   orig_argv << "--with-cppflags='#$CPPFLAGS'"
-   cmd = "#{RbConfig::CONFIG['RUBY_INSTALL_NAME']} extconf.rb #{orig_argv.join(' ')}"
-   system("cd #{key}; #{cmd}")
+   Dir.chdir(key) do
+      system(RbConfig.ruby, "extconf.rb", *subdir_argv)
+   end
 end
 
 subdirs.unshift("src")
 
-begin
-   Dir.chdir("src")
+Dir.chdir("src") do
    if RbConfig::CONFIG["ENABLE_SHARED"] == "no"
       libs = if RbConfig::CONFIG.key?("LIBRUBYARG_STATIC")
                 RbConfig::expand(RbConfig::CONFIG["LIBRUBYARG_STATIC"].dup).sub(/^-l/, '')
@@ -206,8 +206,6 @@ begin
    end
    $objs = ["plruby.o", "plplan.o", "plpl.o", "pltrans.o"] unless $objs
    create_makefile("plruby#{suffix}")
-ensure
-   Dir.chdir("..")
 end
 
 make = open("Makefile", "w")
