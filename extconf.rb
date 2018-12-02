@@ -83,6 +83,8 @@ pg_config = with_config('pg-config', 'pg_config')
 include_dir = `#{pg_config} --includedir`.strip
 $CFLAGS << " -I" << include_dir
 $CFLAGS << " -I" << `#{pg_config} --includedir-server`.strip
+$CFLAGS << " -Wno-clobbered" # -Wclobbered creates too many false positives with PG_TRY()
+$CFLAGS << " -Wno-sign-compare" # -Wsign-compare creates warnings with ARR_DATA_PTR()
 
 if safe = with_config("safe-level")
    safe = Integer(safe)
