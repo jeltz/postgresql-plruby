@@ -177,35 +177,15 @@ pl_plan_init(int argc, VALUE *argv, VALUE obj)
         }
     }
 
+    PG_TRY();
     {
-#ifdef PG_PL_TRYCATCH
-        PG_TRY();
-        {
-            plan = SPI_prepare(RSTRING_PTR(a), qdesc->nargs, qdesc->argtypes);
-        }
-        PG_CATCH();
-        {
-            plan = NULL;
-        }
-        PG_END_TRY();
-#else
-        sigjmp_buf save_restart;
-        extern bool InError;
-
-        memcpy(&save_restart, &Warn_restart, sizeof(save_restart));
-        if (sigsetjmp(Warn_restart, 1) == 0) {
-            PLRUBY_BEGIN_PROTECT(1);
-            plan = SPI_prepare(RSTRING_PTR(a), qdesc->nargs, qdesc->argtypes);
-            memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart));
-            PLRUBY_END_PROTECT;
-        }
-        else {
-            memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart));
-            InError = 0;
-            plan = NULL;
-        }
-#endif
+        plan = SPI_prepare(RSTRING_PTR(a), qdesc->nargs, qdesc->argtypes);
     }
+    PG_CATCH();
+    {
+        plan = NULL;
+    }
+    PG_END_TRY();
 
     if (plan == NULL) {
         char            buf[128];

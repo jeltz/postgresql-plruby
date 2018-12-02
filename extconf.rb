@@ -147,10 +147,6 @@ have_func("rb_hash_delete", "ruby.h")
 have_header("st.h")
 have_header("utils/varlena.h")
 
-if macro_defined?("PG_TRY", %Q{#include "c.h"\n#include "utils/elog.h"})
-    $CFLAGS += " -DPG_PL_TRYCATCH"
-end
-
 enable_conversion = false
 if enable_conversion = enable_config("conversion", true)
    $CFLAGS += " -DPLRUBY_ENABLE_CONVERSION"

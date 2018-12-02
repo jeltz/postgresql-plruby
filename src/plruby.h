@@ -108,8 +108,6 @@ extern int plruby_interrupted;
     }                                                           \
 } while (0)
 
-#ifdef PG_PL_TRYCATCH
-
 #define PLRUBY_BEGIN_PROTECT(lvl_) do {         \
     int in_progress = plruby_in_progress;       \
     if (plruby_interrupted) {                   \
@@ -136,37 +134,9 @@ extern int errorcode;
 } while (0)
 
 #else
-    
-#define PLRUBY_BEGIN_PROTECT(lvl_) do {                                 \
-    sigjmp_buf save_restart;                                            \
-    int in_progress = plruby_in_progress;                               \
-    if (plruby_interrupted) {                                           \
-	rb_raise(pl_ePLruby, "timeout");                                \
-    }                                                                   \
-    memcpy(&save_restart, &Warn_restart, sizeof(save_restart));         \
-    if (sigsetjmp(Warn_restart, 1) != 0) {                              \
-        plruby_in_progress = in_progress;                               \
-        memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart));     \
-        rb_raise(pl_eCatch, "propagate");                               \
-    }                                                                   \
-    plruby_in_progress = lvl_;
-
-#define PLRUBY_END_PROTECT                                      \
-    plruby_in_progress = in_progress;                           \
-    memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart)); \
-    if (plruby_interrupted) {                                   \
-        rb_raise(pl_ePLruby, "timeout");                        \
-    }                                                           \
-} while (0)
-
-#endif
-
-#else
 
 #define PLRUBY_BEGIN(lvl_)
 #define PLRUBY_END
-
-#ifdef PG_PL_TRYCATCH
 
 #define PLRUBY_BEGIN_PROTECT(lvl_) do {         \
     PG_TRY();                                   \
@@ -180,22 +150,6 @@ extern int errorcode;
     }                                           \
     PG_END_TRY();                               \
 } while (0)
-
-#else
-
-#define PLRUBY_BEGIN_PROTECT(lvl_) do {                                 \
-    sigjmp_buf save_restart;                                            \
-    memcpy(&save_restart, &Warn_restart, sizeof(save_restart));         \
-    if (sigsetjmp(Warn_restart, 1) != 0) {                              \
-        memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart));     \
-        rb_raise(pl_eCatch, "propagate");                               \
-    }
-
-#define PLRUBY_END_PROTECT                                              \
-     memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart));        \
-} while (0)
-   
-#endif
 
 #endif
 

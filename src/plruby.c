@@ -337,47 +337,39 @@ pl_protect(plth)
     Datum retval;
     VALUE result;
 
-#ifdef PG_PL_TRYCATCH
     PG_TRY();
-#else
-    if (sigsetjmp(Warn_restart, 1) != 0) {
-        return pl_eCatch;
-    }
-#endif
     {
-	if (plth->validator) {
-	    retval = pl_validator_handler(plth);
-	}
-	else
-	{
-	    if (CALLED_AS_TRIGGER(plth->fcinfo)) {
-		retval = PointerGD(pl_trigger_handler(plth));
-	    }
-	    else {
-		retval = pl_func_handler(plth);
-	    }
+		if (plth->validator) {
+		    retval = pl_validator_handler(plth);
+		}
+		else
+		{
+		    if (CALLED_AS_TRIGGER(plth->fcinfo)) {
+			retval = PointerGD(pl_trigger_handler(plth));
+		    }
+		    else {
+			retval = pl_func_handler(plth);
+		    }
 
-            PLRUBY_BEGIN_PROTECT(1);
-            {
-                MemoryContext oldcxt;
-                int rc;
+                PLRUBY_BEGIN_PROTECT(1);
+                {
+                    MemoryContext oldcxt;
+                    int rc;
 
-                oldcxt = MemoryContextSwitchTo(plruby_spi_context);
-                if ((rc = SPI_finish()) != SPI_OK_FINISH) {
-                    elog(ERROR, "SPI_finish() failed : %d", rc);
+                    oldcxt = MemoryContextSwitchTo(plruby_spi_context);
+                    if ((rc = SPI_finish()) != SPI_OK_FINISH) {
+                        elog(ERROR, "SPI_finish() failed : %d", rc);
+                    }
+                    MemoryContextSwitchTo(oldcxt);
                 }
-                MemoryContextSwitchTo(oldcxt);
-            }
-            PLRUBY_END_PROTECT;
-	}
+                PLRUBY_END_PROTECT;
+		}
     }
-#ifdef PG_PL_TRYCATCH
     PG_CATCH();
     {
         return pl_eCatch;
     }
     PG_END_TRY();
-#endif
     result = Data_Wrap_Struct(rb_cObject, pl_result_mark, 0, (void *)retval);
     return result;
 }
@@ -474,15 +466,11 @@ pl_real_handler(struct pl_thread_st *plth)
 
     state = 0;
     pl_call_level++;
-#ifdef PG_PL_TRYCATCH
     PG_TRY();
-#endif
     {
         result = rb_protect(pl_protect, (VALUE)plth, &state);
     }
-#ifdef PG_PL_TRYCATCH
     PG_END_TRY();
-#endif
     pl_call_level--;
     if (state) {
         state = 0;
@@ -521,9 +509,6 @@ Datum
 pl_internal_call_handler(struct pl_thread_st *plth)
 {
     VALUE result;
-#ifndef PG_PL_TRYCATCH
-    sigjmp_buf save_restart;
-#endif
     volatile VALUE *tmp;
     MemoryContext orig_context;
     volatile VALUE orig_id;
@@ -549,9 +534,6 @@ pl_internal_call_handler(struct pl_thread_st *plth)
     }
     plruby_spi_context =  MemoryContextSwitchTo(orig_context);
 
-#ifndef PG_PL_TRYCATCH
-    memcpy(&save_restart, &Warn_restart, sizeof(save_restart));
-#endif
 #ifdef PLRUBY_TIMEOUT
     if (!pl_call_level) {
         VALUE th;
@@ -590,9 +572,6 @@ pl_internal_call_handler(struct pl_thread_st *plth)
         result = exa->result;
     }
 #endif
-#ifndef PG_PL_TRYCATCH
-    memcpy(&Warn_restart, &save_restart, sizeof(Warn_restart));
-#endif
 
 #ifdef PLRUBY_TIMEOUT
     if (!pl_call_level) {
@@ -627,11 +606,7 @@ pl_internal_call_handler(struct pl_thread_st *plth)
             rb_raise(pl_eCatch, "SPI ERROR");
         }
         else {
-#ifdef PG_PL_TRYCATCH
             PG_RE_THROW();
-#else
-            siglongjmp(Warn_restart, 1);
-#endif
         }
     }
     if (TYPE(result) == T_STRING && RSTRING_PTR(result)) {
