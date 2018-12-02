@@ -14,7 +14,7 @@ static ID id_delete;
 
 #endif
 
-static char *names = 
+static const char *names =
 "SELECT a.attname FROM pg_class c, pg_attribute a, pg_namespace n"
 " WHERE c.relname = '%s' AND a.attnum > 0 AND NOT a.attisdropped AND a.attrelid = c.oid"
 " AND c.relnamespace = n.oid AND n.nspname = '%s'"
@@ -53,7 +53,7 @@ pl_column_name(VALUE obj, VALUE table)
     return res;
 }
 
-static char *types = 
+static const char *types =
 "SELECT t.typname FROM pg_class c, pg_attribute a, pg_type t, pg_namespace n"
 " WHERE c.relname = '%s' and a.attnum > 0 AND NOT a.attisdropped"
 " AND a.attrelid = c.oid and a.atttypid = t.oid"
@@ -120,7 +120,7 @@ pl_query_name(VALUE obj)
 {
     VALUE res, tmp;
     struct pl_tuple *tpl;
-    char * attname;
+    const char * attname;
     int i;
 
     tmp = rb_thread_local_aref(rb_thread_current(), id_thr);

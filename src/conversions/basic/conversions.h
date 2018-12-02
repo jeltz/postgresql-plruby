@@ -1,5 +1,5 @@
 {
-    extern void plruby_require(char *);
+    extern void plruby_require(const char *);
 
     plruby_require("plruby/plruby_basic");
     rb_hash_aset(plruby_classes, INT2NUM(OIDOID), rb_cInteger);

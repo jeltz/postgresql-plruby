@@ -310,7 +310,7 @@ extern VALUE plruby_classes, plruby_conversions;
 extern Oid plruby_datum_oid _((VALUE, int *));
 extern VALUE plruby_datum_set _((VALUE, Datum));
 extern Datum plruby_datum_get _((VALUE, Oid *));
-extern VALUE plruby_define_void_class _((char *, char *));
+extern VALUE plruby_define_void_class _((const char *, const char *));
 #endif
 
 #define DFC1(a_, b_) DirectFunctionCall1((a_), (b_))

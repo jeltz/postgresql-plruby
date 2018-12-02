@@ -39,7 +39,7 @@ pl_trans_mark(void *trans)
 #define make_savepoint_name(name) (name)
 #else
 static List *
-make_savepoint_name(char *name)
+make_savepoint_name(const char *name)
 {
     DefElem *f = makeNode(DefElem);
     f->defname = "savepoint_name";

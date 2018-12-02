@@ -48,7 +48,7 @@ pl_plan_save(VALUE obj)
 
     if (qdesc->plan == NULL) {
         char buf[128];
-        char *reason;
+        const char *reason;
             
         switch (SPI_result) {
         case SPI_ERROR_ARGUMENT:
@@ -209,7 +209,7 @@ pl_plan_init(int argc, VALUE *argv, VALUE obj)
 
     if (plan == NULL) {
         char            buf[128];
-        char       *reason;
+        const char      *reason;
 
         switch (SPI_result) {
         case SPI_ERROR_ARGUMENT:

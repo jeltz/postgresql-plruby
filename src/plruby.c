@@ -127,7 +127,7 @@ protect_require(VALUE name)
 }
 
 static void
-plruby_require(char *name)
+plruby_require(const char *name)
 {
     int status;
 
@@ -226,7 +226,7 @@ pl_conversions_missing(int argc, VALUE *argv, VALUE obj)
 }
 
 VALUE
-plruby_define_void_class(char *name, char *path)
+plruby_define_void_class(const char *name, const char *path)
 {
     VALUE klass;
 
@@ -713,7 +713,7 @@ PLRUBY_CALL_HANDLER(PG_FUNCTION_ARGS)
     return pl_internal_call_handler(&plth);
 }
 
-static char *definition = "def PLtemp.%s(%s)\n%s\nend";
+static const char *definition = "def PLtemp.%s(%s)\n%s\nend";
 
 static VALUE
 pl_arg_names(HeapTuple procTup, pl_proc_desc *prodesc) 
@@ -768,7 +768,7 @@ pl_compile(struct pl_thread_st *plth, int istrigger)
     VALUE value_proname;
     Oid result_oid = 0, arg_type[FUNC_MAX_ARGS];
     int nargs = 0;
-    static char *argt = "new, old, args, tg";
+    static const char *argt = "new, old, args, tg";
     PG_FUNCTION_ARGS;
     
     fcinfo = plth->fcinfo;
@@ -1377,15 +1377,15 @@ pl_exist_singleton()
     return 1;
 }
 
-static char *recherche = 
+static const char *recherche =
     "select name, args, body from plruby_singleton_methods where name = '%s'";
 
-static char *singleton = "select prosrc from pg_proc,pg_language,pg_type"
+static const char *singleton = "select prosrc from pg_proc,pg_language,pg_type"
 " where proname = '%s' and pg_proc.prolang = pg_language.oid"
 " and pg_language.lanname = 'plruby'"
 " and prorettype = pg_type.oid and typname != 'trigger'";
 
-static char *def_singleton = "def PLtemp.%s(*args)\n%s\nend";
+static const char *def_singleton = "def PLtemp.%s(*args)\n%s\nend";
 
 #ifndef HAVE_RB_BLOCK_CALL
 static VALUE
