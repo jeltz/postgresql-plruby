@@ -11,7 +11,4 @@ test/conv_geometry/test_queries.sql
 test/conv_network/test_queries.sql
 test/plp/test_setup.sql
 test/plt/test_setup.sql
-test/range/test.expected.73
-test/range/test.expected.74
-test/range/test.expected.75
 test/range/test_queries.sql
