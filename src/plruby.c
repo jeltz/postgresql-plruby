@@ -333,7 +333,7 @@ pl_init_conversions()
 #endif
 }
 
-static void pl_result_mark(VALUE obj) {}
+static void pl_result_mark(void *ptr) {}
 
 static VALUE
 pl_protect(plth)
