@@ -162,6 +162,11 @@ static VALUE class_to_load = Qnil;
 static VALUE exec_th = Qnil;
 
 static VALUE
+pl_intern_require(VALUE fname) {
+    return rb_require((char *)fname);
+}
+
+static VALUE
 pl_require_th(VALUE th)
 {
     while (1) {
@@ -170,7 +175,7 @@ pl_require_th(VALUE th)
             if (TYPE(file_to_load) == T_STRING && 
                 RSTRING_PTR(file_to_load)) {
                 rb_undef_method(CLASS_OF(class_to_load), "method_missing");
-                rb_protect((VALUE(*)(VALUE))rb_require, 
+                rb_protect(pl_intern_require,
                            (VALUE)RSTRING_PTR(file_to_load), 0);
                 file_to_load = Qnil;
             }
