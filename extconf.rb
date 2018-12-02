@@ -194,7 +194,7 @@ Dir.chdir("src") do
              end
       find_library(libs, "ruby_init", RbConfig::expand(RbConfig::CONFIG["archdir"]))
    end
-   $objs = ["plruby.o", "plplan.o", "plpl.o", "pltrans.o"] unless $objs
+   $objs = ["plruby.o", "plplan.o", "plpl.o", "pltrans.o"]
    create_makefile("plruby#{suffix}")
 end
 
